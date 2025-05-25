@@ -3,7 +3,10 @@
     "autoload": {
         "psr-4": {
             "App\\": "src/"
-        }
+        },
+        "files": [
+            "src/Helpers/array_helpers.php"
+        ]
     },
     "authors": [
         {
