@@ -4,12 +4,12 @@ namespace App\Rules;
 
 use App\Core\RuleInterface;
 
-class FieldComparisonRule implements RuleInterface
+readonly class FieldComparisonRule implements RuleInterface
 {
     public function __construct(
-        private readonly string $field,
-        private readonly string $operator,
-        private readonly mixed  $value
+        private string $field,
+        private string $operator,
+        private mixed  $value
     )
     {
     }
@@ -41,5 +41,33 @@ class FieldComparisonRule implements RuleInterface
             '!=' => $current != $this->value,
             default => false,
         };
+    }
+
+    public function evaluateWithReport(array $input): array
+    {
+        $result = $this->evaluate($input);
+
+        $details = [
+            'type' => 'field_comparison',
+            'field' => $this->field,
+            'operator' => $this->operator,
+            'value' => $this->value,
+            'input_value' => $this->getFieldValue($input, $this->field),
+        ];
+
+        return ['result' => $result, 'details' => $details];
+    }
+
+    private function getFieldValue(array $input, string $field): mixed
+    {
+        $parts = explode('.', $field);
+        $current = $input;
+        foreach ($parts as $part) {
+            if (!isset($current[$part])) {
+                return null;
+            }
+            $current = $current[$part];
+        }
+        return $current;
     }
 }

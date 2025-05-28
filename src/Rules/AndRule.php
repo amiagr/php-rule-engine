@@ -17,4 +17,29 @@ readonly class AndRule implements RuleInterface
     {
         return array_all($this->rules, fn($rule) => $rule->evaluate($input));
     }
+
+    public function evaluateWithReport(array $input): array
+    {
+        $subReports = [];
+        foreach ($this->rules as $rule) {
+            $report = $rule->evaluateWithReport($input);
+            $subReports[] = $report;
+            if (!$report['result']) {
+                return [
+                    'result' => false,
+                    'details' => [
+                        'type' => 'and',
+                        'sub_results' => $subReports,
+                    ]
+                ];
+            }
+        }
+        return [
+            'result' => true,
+            'details' => [
+                'type' => 'and',
+                'sub_results' => $subReports,
+            ]
+        ];
+    }
 }

@@ -17,4 +17,30 @@ readonly class OrRule implements RuleInterface
     {
         return array_any($this->rules, fn($rule) => $rule->evaluate($input));
     }
+
+    public function evaluateWithReport(array $input): array
+    {
+        $subReports = [];
+        foreach ($this->rules as $rule) {
+            $report = $rule->evaluateWithReport($input);
+            $subReports[] = $report;
+            if ($report['result']) {
+                return [
+                    'result' => true,
+                    'details' => [
+                        'type' => 'or',
+                        'sub_results' => $subReports,
+                    ]
+                ];
+            }
+        }
+
+        return [
+            'result' => false,
+            'details' => [
+                'type' => 'or',
+                'sub_results' => $subReports,
+            ]
+        ];
+    }
 }
